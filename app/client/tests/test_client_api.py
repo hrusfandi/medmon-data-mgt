@@ -5,21 +5,27 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from core.models import Client
-
 from client.serializers import ClientSerializer
+
+from unittest.mock import patch
 
 
 CLIENTS_URL = reverse('client:client-list')
 
 
-class PublicClientsAPITests(TestCase):
+class PrivateClientAPITests(TestCase):
     """Test the publicly available clients API"""
 
     def setUp(self):
         self.client = APIClient()
 
-    def test_retrieve_clients(self):
+    @patch('core.authentication.JWTAuthentication.authenticate')
+    def test_retrieve_clients(self, mock_jwt_auth):
         """Test retrieving the client objects"""
+        data = {"token_type": "access", "exp": 1582703472,
+                "jti": "fcbaabbc963542429db9e93fd0aa158d", "user_id": 2}
+        mock_jwt_auth.return_value = (data, None)
+
         Client.objects.create(name='PT ABC', address='Jl.Jenderal Soedirman',
                               contact='021-999888')
         Client.objects.create(name='PT XYZ', address='Jl.Gatot Soebroto',
@@ -32,8 +38,13 @@ class PublicClientsAPITests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, serializer.data)
 
-    def test_create_client_successful(self):
+    @patch('core.authentication.JWTAuthentication.authenticate')
+    def test_create_client_successful(self, mock_jwt_auth):
         """Test creating client object successful"""
+        data = {"token_type": "access", "exp": 1582703472,
+                "jti": "fcbaabbc963542429db9e93fd0aa158d", "user_id": 2}
+        mock_jwt_auth.return_value = (data, None)
+
         payload = {
             'name': 'PT ABC',
             'address': 'Jl. Jend Soedirman',
@@ -50,8 +61,13 @@ class PublicClientsAPITests(TestCase):
         self.assertTrue(exists)
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
 
-    def test_create_client_invalid(self):
+    @patch('core.authentication.JWTAuthentication.authenticate')
+    def test_create_client_invalid(self, mock_jwt_auth):
         """Test creating client with invalid payload"""
+        data = {"token_type": "access", "exp": 1582703472,
+                "jti": "fcbaabbc963542429db9e93fd0aa158d", "user_id": 2}
+        mock_jwt_auth.return_value = (data, None)
+
         payload = {
             'name': '',
             'address': '',

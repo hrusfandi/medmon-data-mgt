@@ -26,3 +26,8 @@ services:
       - POSTGRES_DB=medmon_data_mgt
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=supersecretpassword
+
+networks:
+  default:
+    external:
+      name: mynetwork

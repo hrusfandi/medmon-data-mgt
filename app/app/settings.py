@@ -21,6 +21,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'nr(j$0x20&i@zm_l1bg$=c*)9pya3y)6u@ngf*@wgvl=+afzh!'
+AUTH_SERVICE_SECRET_KEY = 'iw-xwlv2ws)!i!mk)m-bvllb-l$ci=g54xcguxmy0_6+0+n9*b'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -39,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'core',
+    'requests',
 ]
 
 MIDDLEWARE = [
@@ -118,6 +120,12 @@ USE_L10N = True
 
 USE_TZ = True
 
+#rest-framework settings
+# REST_FRAMEWORK = {
+#     'DEFAULT_AUTHENTICATION_CLASSES': (
+#         'staff.authentication.ExampleAuthentication',
+#     )
+# }
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
