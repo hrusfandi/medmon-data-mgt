@@ -13,8 +13,38 @@ from unittest.mock import patch
 CLIENTS_URL = reverse('client:client-list')
 
 
+class PublicClientAPITests(TestCase):
+    """Test the publicly clients API"""
+
+    def setUp(self):
+        self.client = APIClient()
+
+    def test_retrieve_clients_forbidden(self):
+        """Test retrieve clients forbidden"""
+        Client.objects.create(name='PT ABC', address='Jl.Jenderal Soedirman',
+                              contact='021-999888')
+        Client.objects.create(name='PT XYZ', address='Jl.Gatot Soebroto',
+                              contact='021-888999')
+
+        res = self.client.get(CLIENTS_URL)
+
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_create_clients_forbidden(self):
+        """test create client object forbidden"""
+        payload = {
+            'name': 'PT ABC',
+            'address': 'Jl. Jend Soedirman',
+            'contact': '021-99998888'
+        }
+
+        res = self.client.post(CLIENTS_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+
+
 class PrivateClientAPITests(TestCase):
-    """Test the publicly available clients API"""
+    """Test the privately available clients API"""
 
     def setUp(self):
         self.client = APIClient()

@@ -19,6 +19,30 @@ class PublicStaffsAPITests(TestCase):
     def setUp(self):
         self.client = APIClient()
 
+    def test_retrieve_staffs_forbidden(self):
+        """Test retrieving the staffs forbidden access"""
+        Staff.objects.create(name='Topan', address='Pondok Pinang',
+                             contact='087739991234', NIP='123456789')
+        Staff.objects.create(name='Rizki', address='Parung Panjang',
+                             contact='087739991234', NIP='432112345678')
+
+        res = self.client.get(STAFFS_URL)
+
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_create_staff_forbidden(self):
+        """Test creating staff forbidden access"""
+        payload = {
+            'name': 'Topan',
+            'address': 'Pondok Pinang',
+            'contact': '087739991234',
+            'NIP': '1234567890'
+        }
+
+        res = self.client.post(STAFFS_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+
 
 class PrivateStaffAPITest(TestCase):
     """Test private access of staff api"""
