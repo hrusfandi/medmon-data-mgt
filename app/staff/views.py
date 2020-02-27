@@ -8,7 +8,10 @@ from staff import serializers
 
 class StaffViewSet(viewsets.GenericViewSet,
                    mixins.ListModelMixin,
-                   mixins.CreateModelMixin):
+                   mixins.CreateModelMixin,
+                   mixins.RetrieveModelMixin,
+                   mixins.UpdateModelMixin,
+                   mixins.DestroyModelMixin):
     """Viewset for staff objects"""
     authentication_classes = (JWTAuthentication,)
 

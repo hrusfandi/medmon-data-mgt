@@ -13,6 +13,25 @@ from staff.serializers import StaffSerializer
 STAFFS_URL = reverse('staff:staff-list')
 
 
+def detail_url(staff_id):
+    """Return staff's detail URL"""
+    return reverse('staff:staff-detail', args=[staff_id])
+
+
+def sample_staff(**params):
+    """Create and return sample staff"""
+    defaults = {
+        'name': 'Test name',
+        'address': 'test address',
+        'contact': '089912345678',
+        'NIP': '1234567890'
+    }
+
+    defaults.update(params)
+
+    return Staff.objects.create(**defaults)
+
+
 class PublicStaffsAPITests(TestCase):
     """Test the publicly available staffs API"""
 
@@ -108,3 +127,82 @@ class PrivateStaffAPITest(TestCase):
 
         res = self.client.post(STAFFS_URL, payload)
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    @patch('core.authentication.JWTAuthentication.authenticate')
+    def test_retrieve_staff_detail(self, mock_jwt_auth):
+        """Test viewing staff detail"""
+        data = {"token_type": "access", "exp": 1582703472,
+                "jti": "fcbaabbc963542429db9e93fd0aa158d", "user_id": 2}
+        mock_jwt_auth.return_value = (data, None)
+
+        staff = sample_staff()
+
+        url = detail_url(staff.id)
+        res = self.client.get(url)
+
+        serializer = StaffSerializer(staff)
+        self.assertEqual(res.data, serializer.data)
+
+    @patch('core.authentication.JWTAuthentication.authenticate')
+    def test_full_update_staff(self, mock_jwt_auth):
+        """test updating staff"""
+        data = {"token_type": "access", "exp": 1582703472,
+                "jti": "fcbaabbc963542429db9e93fd0aa158d", "user_id": 2}
+        mock_jwt_auth.return_value = (data, None)
+
+        staff = sample_staff()
+
+        payload = {
+            'name': 'Hendi',
+            'address': 'Tangerang',
+            'contact': '087739271234',
+            'NIP': '1234567890'
+        }
+
+        url = detail_url(staff.id)
+        self.client.put(url, payload)
+
+        staff.refresh_from_db()
+        self.assertEqual(staff.name, payload['name'])
+        self.assertEqual(staff.address, payload['address'])
+        self.assertEqual(staff.contact, payload['contact'])
+        self.assertEqual(staff.NIP, payload['NIP'])
+
+    @patch('core.authentication.JWTAuthentication.authenticate')
+    def test_partial_update_staff(self, mock_jwt_auth):
+        """Test updating partial data of staff"""
+        data = {"token_type": "access", "exp": 1582703472,
+                "jti": "fcbaabbc963542429db9e93fd0aa158d", "user_id": 2}
+        mock_jwt_auth.return_value = (data, None)
+
+        staff = sample_staff()
+        staff_address = staff.address
+
+        payload = {
+            'name': 'Hendi Rusfandi',
+            'contact': '089912345678',
+        }
+
+        url = detail_url(staff.id)
+        self.client.patch(url, payload)
+
+        staff.refresh_from_db()
+        self.assertEqual(staff.name, payload['name'])
+        self.assertEqual(staff.contact, payload['contact'])
+        self.assertEqual(staff.address, staff_address)
+
+    @patch('core.authentication.JWTAuthentication.authenticate')
+    def test_delete_staff(self, mock_jwt_auth):
+        """Test deleting staff"""
+        data = {"token_type": "access", "exp": 1582703472,
+                "jti": "fcbaabbc963542429db9e93fd0aa158d", "user_id": 2}
+        mock_jwt_auth.return_value = (data, None)
+
+        staff = sample_staff(name='Hendi Rusfandi')
+
+        url = detail_url(staff.id)
+        self.client.delete(url)
+
+        res = self.client.get(url)
+
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
